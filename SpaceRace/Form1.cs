@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,10 +23,12 @@ namespace SpaceRace
         int player2Score = 0;
 
         List<Rectangle> asteriods = new List<Rectangle>();
+        List<Rectangle> asteriods2 = new List<Rectangle>();
 
         int asteriodWidth = 8;
         int asteriodHeight = 2;
         int asteriodSpeed = 6;
+        int asteriod2Speed = -6;
 
         bool wDown = false;
         bool sDown = false;
@@ -38,6 +41,7 @@ namespace SpaceRace
         int randValue = 0;
 
         string gameState = "waiting";
+
         public Form1()
         {
             InitializeComponent();
@@ -154,33 +158,52 @@ namespace SpaceRace
                 player2.Y = 290;
             }
 
-            // move obstacles
+            // move obstacles from the left
             for (int i = 0; i < asteriods.Count; i++)
             {
                 int x = asteriods[i].X + asteriodSpeed;
                 asteriods[i] = new Rectangle(x, asteriods[i].Y, asteriodWidth, asteriodHeight);
             }
 
+            //move obstacles from the right
+            for (int i = 0; i < asteriods2.Count; i++)
+            {
+                int x = asteriods2[i].X + asteriod2Speed;
+                asteriods2[i] = new Rectangle(x, asteriods2[i].Y, asteriodWidth, asteriodHeight);
+            }
+
             //generate a random value
             randValue = randGen.Next(1, 101);
 
             //generate new asteriod if it is time
-            if (randValue < 25)
+            if (randValue < 20)
             {
                 asteriods.Add(new Rectangle(0, randGen.Next(0, this.Height - 40), asteriodWidth, asteriodHeight));
             }
 
-            if (randValue < 25)
+            //generate a random value
+            randValue = randGen.Next(1, 101);
+
+            if (randValue < 20)
             {
-                asteriods.Add(new Rectangle(0, randGen.Next(0, this.Height - 40), asteriodWidth, asteriodHeight));
+                asteriods2.Add(new Rectangle(this.Width, randGen.Next(0, this.Height - 40), asteriodWidth, asteriodHeight));
             }
 
-            //recomve ball if it goes off the screen (test at y = 400)
+            //recomve ball if it goes off the right of the screen
             for (int i = 0; i < asteriods.Count; i++)
             {
                 if (asteriods[i].Y >= this.Width)
                 {
                     asteriods.RemoveAt(i);
+                }
+            }
+
+            //recomve ball if it goes off the left of the screen
+            for (int i = 0; i < asteriods2.Count; i++)
+            {
+                if (asteriods2[i].Y <= 0)
+                {
+                    asteriods2.RemoveAt(i);
                 }
             }
 
@@ -192,12 +215,22 @@ namespace SpaceRace
                     player1.X = 180;
                     player1.Y = 290;
                 }
+                else if (player2.IntersectsWith(asteriods[i]))
+                {
+                    player2.X = 320;
+                    player2.Y = 290;
+                }
             }
 
             //check for collision between player2 and asteroid
-            for (int i = 0; i < asteriods.Count; i++)
+            for (int i = 0; i < asteriods2.Count; i++)
             {
-                if (player2.IntersectsWith(asteriods[i]))
+                if (player1.IntersectsWith(asteriods2[i]))
+                {
+                    player1.X = 180;
+                    player1.Y = 290;
+                }
+                else if (player2.IntersectsWith(asteriods2[i]))
                 {
                     player2.X = 320;
                     player2.Y = 290;
@@ -234,10 +267,16 @@ namespace SpaceRace
                 e.Graphics.FillRectangle(whiteBrush, player1);
                 e.Graphics.FillRectangle(whiteBrush, player2);
 
-                // draw asteriods
+                // draw asteriods coming from the left
                 for (int i = 0; i < asteriods.Count(); i++)
                 {
                     e.Graphics.FillRectangle(whiteBrush, asteriods[i]);
+                }
+
+                // draw asteriods coming from the right
+                for (int i = 0; i < asteriods2.Count(); i++)
+                {
+                    e.Graphics.FillRectangle(whiteBrush, asteriods2[i]);
                 }
             }
             else if (gameState == "p1Winning")
