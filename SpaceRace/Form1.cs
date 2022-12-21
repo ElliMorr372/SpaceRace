@@ -42,6 +42,7 @@ namespace SpaceRace
 
         string gameState = "waiting";
 
+        SoundPlayer collision = new SoundPlayer(Properties.Resources.collision);
         public Form1()
         {
             InitializeComponent();
@@ -214,11 +215,13 @@ namespace SpaceRace
                 {
                     player1.X = 180;
                     player1.Y = 290;
+                    collision.Play();
                 }
                 else if (player2.IntersectsWith(asteriods[i]))
                 {
                     player2.X = 320;
                     player2.Y = 290;
+                    collision.Play();
                 }
             }
 
@@ -229,11 +232,13 @@ namespace SpaceRace
                 {
                     player1.X = 180;
                     player1.Y = 290;
+                    collision.Play();
                 }
                 else if (player2.IntersectsWith(asteriods2[i]))
                 {
                     player2.X = 320;
                     player2.Y = 290;
+                    collision.Play();
                 }
             }
 
