@@ -9,6 +9,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+// Elliana Morrison: December 21st, 2022
+// A simple space race game with
+// two players and asteriods
+
 namespace SpaceRace
 {
     public partial class Form1 : Form
@@ -24,11 +28,13 @@ namespace SpaceRace
 
         List<Rectangle> asteriods = new List<Rectangle>();
         List<Rectangle> asteriods2 = new List<Rectangle>();
+        List<int> asteriodsSpeed = new List<int>();
+        List<int> asteriods2Speed = new List<int>();
 
         int asteriodWidth = 8;
         int asteriodHeight = 2;
-        int asteriodSpeed = 6;
-        int asteriod2Speed = -6;
+        //int asteriodSpeed = 6;
+        //int asteriod2Speed = -6;
 
         bool wDown = false;
         bool sDown = false;
@@ -43,6 +49,7 @@ namespace SpaceRace
         string gameState = "waiting";
 
         SoundPlayer collision = new SoundPlayer(Properties.Resources.collision);
+        SoundPlayer gainedPoint = new SoundPlayer(Properties.Resources.gainedPoint);
         public Form1()
         {
             InitializeComponent();
@@ -64,6 +71,9 @@ namespace SpaceRace
             player1.Y = 280;
             player2.Y = 280;
             asteriods.Clear();
+            asteriods2.Clear();
+            asteriodsSpeed.Clear();
+            asteriods2Speed.Clear();
         }
 
         private void Form1_KeyDown_1(object sender, KeyEventArgs e)
@@ -145,31 +155,33 @@ namespace SpaceRace
             // Add a point and reset player position on the bottom if players 
             if (player1.Y <= 0)
             {
+                gainedPoint.Play();
                 player1Score++;
                 p1ScoreLabel.Text = $"{player1Score}";
                 player1.X = 180;
-                player1.Y = 290;
+                player1.Y = 280;
             }
 
             if (player2.Y <= 0)
             {
+                gainedPoint.Play();
                 player2Score++;
                 p2ScoreLabel.Text = $"{player2Score}";
                 player2.X = 320;
-                player2.Y = 290;
+                player2.Y = 280;
             }
 
             // move obstacles from the left
             for (int i = 0; i < asteriods.Count; i++)
             {
-                int x = asteriods[i].X + asteriodSpeed;
+                int x = asteriods[i].X + asteriodsSpeed[i];
                 asteriods[i] = new Rectangle(x, asteriods[i].Y, asteriodWidth, asteriodHeight);
             }
 
             //move obstacles from the right
             for (int i = 0; i < asteriods2.Count; i++)
             {
-                int x = asteriods2[i].X + asteriod2Speed;
+                int x = asteriods2[i].X + asteriods2Speed[i];
                 asteriods2[i] = new Rectangle(x, asteriods2[i].Y, asteriodWidth, asteriodHeight);
             }
 
@@ -177,17 +189,19 @@ namespace SpaceRace
             randValue = randGen.Next(1, 101);
 
             //generate new asteriod if it is time
-            if (randValue < 20)
+            if (randValue < 21)
             {
                 asteriods.Add(new Rectangle(0, randGen.Next(0, this.Height - 40), asteriodWidth, asteriodHeight));
+                asteriodsSpeed.Add(randGen.Next(1, 11));
             }
 
             //generate a random value
             randValue = randGen.Next(1, 101);
 
-            if (randValue < 20)
+            if (randValue < 21)
             {
                 asteriods2.Add(new Rectangle(this.Width, randGen.Next(0, this.Height - 40), asteriodWidth, asteriodHeight));
+                asteriods2Speed.Add(randGen.Next(-11, -1));
             }
 
             //recomve ball if it goes off the right of the screen
@@ -196,6 +210,7 @@ namespace SpaceRace
                 if (asteriods[i].Y >= this.Width)
                 {
                     asteriods.RemoveAt(i);
+                    asteriodsSpeed.RemoveAt(i);
                 }
             }
 
@@ -205,6 +220,7 @@ namespace SpaceRace
                 if (asteriods2[i].Y <= 0)
                 {
                     asteriods2.RemoveAt(i);
+                    asteriods2Speed.RemoveAt(i);
                 }
             }
 
@@ -214,13 +230,13 @@ namespace SpaceRace
                 if (player1.IntersectsWith(asteriods[i]))
                 {
                     player1.X = 180;
-                    player1.Y = 290;
+                    player1.Y = 280;
                     collision.Play();
                 }
                 else if (player2.IntersectsWith(asteriods[i]))
                 {
                     player2.X = 320;
-                    player2.Y = 290;
+                    player2.Y = 280;
                     collision.Play();
                 }
             }
@@ -231,13 +247,13 @@ namespace SpaceRace
                 if (player1.IntersectsWith(asteriods2[i]))
                 {
                     player1.X = 180;
-                    player1.Y = 290;
+                    player1.Y = 280;
                     collision.Play();
                 }
                 else if (player2.IntersectsWith(asteriods2[i]))
                 {
                     player2.X = 320;
-                    player2.Y = 290;
+                    player2.Y = 280;
                     collision.Play();
                 }
             }
@@ -286,11 +302,13 @@ namespace SpaceRace
             }
             else if (gameState == "p1Winning")
             {
+                gameLoop.Enabled = false;
                 titleLabel.Text = "Player 1 Won!";
                 subtitleLabel.Text = "Press Space to Start or Escape to Exit";
             }
             else if (gameState == "p2Winning")
             {
+                gameLoop.Enabled = false;
                 titleLabel.Text = "Player 2 Won!";
                 subtitleLabel.Text = "Press Space to Start or Escape to Exit";
             }
